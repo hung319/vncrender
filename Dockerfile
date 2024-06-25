@@ -1,4 +1,3 @@
-# Sử dụng image Ubuntu làm base image
 FROM ubuntu:latest
 
 # Cài đặt các gói cần thiết
@@ -7,8 +6,6 @@ RUN apt-get update && \
     x11vnc \
     xvfb \
     tigervnc-standalone-server \
-    novnc \
-    websockify \
     xfonts-base \
     && rm -rf /var/lib/apt/lists/*
 
@@ -19,17 +16,12 @@ RUN useradd -ms /bin/bash vncuser \
     && x11vnc -storepasswd "${VNC_PASSWORD}" /home/vncuser/.vnc/passwd \
     && chown -R vncuser:vncuser /home/vncuser/.vnc
 
-# Cấu hình noVNC
-COPY novnc /home/vncuser/novnc
-RUN chown -R vncuser:vncuser /home/vncuser/novnc
-
-# Khai báo cổng cho VNC và noVNC
-EXPOSE 5901 6080
+# Khai báo cổng cho VNC
+EXPOSE 5901
 
 # Cài đặt môi trường desktop (tùy chọn)
 # RUN apt-get install -y xfce4 xfce4-terminal
 
-# Khởi động VNC và noVNC khi container chạy
+# Khởi động VNC khi container chạy
 USER vncuser
-CMD vncserver :1 -geometry 1280x800 -SecurityTypes None -AlwaysShared -localhost && \
-    websockify -D --web /home/vncuser/novnc 6080 localhost:5901
+CMD vncserver :1 -geometry 1280x800 -SecurityTypes None -AlwaysShared -localhost
